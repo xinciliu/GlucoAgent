@@ -36,7 +36,7 @@ All dependencies are listed in `requirements.txt`, including:
 
 ## Data Specification
 ### Data File
-Only one raw numerical CSV file is required: `cgm_ts.csv`
+CGM raw numerical CSV file is required: `cgm_ts.csv`
 
 ### File Format Requirements
 - The CSV file contains multiple feature columns for CGM monitoring (glucose value, carbohydrate intake, insulin dosage).
