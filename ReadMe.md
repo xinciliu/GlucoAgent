@@ -31,27 +31,13 @@ All dependencies are listed in `requirements.txt`, including:
 
 ## Project Structure
 GlucoAgent/
-
-├── main.py               # 唯一入口：训练/预测/推荐 全流程主代码
-
-├── requirements.txt      # 依赖清单
-
-├── README.md             # 项目说明（英文）
-
-├── config.yaml           # 统一配置文件（模型/数据/LLM 所有参数）
-
-├── data/                 # 输入数据文件夹
-
-│   ├── cgm_data.csv      # CGM 时序输入（必填）
-
-│   └── user_info.txt     # 用户描述文本（必填）
-
-├── reference.json        # 推荐模块：糖尿病参考文献库
-
-├── best_model.pth        # 自动生成：训练好的模型权重
-
-└── outputs/              # 自动生成：预测结果 + 推荐文本
-
-
-
-
+&nbsp;&nbsp;├── main.py               # Main program (train / predict / generate recommendation)
+&nbsp;&nbsp;├── requirements.txt      # Python dependencies
+&nbsp;&nbsp;├── README.md             # Project documentation
+&nbsp;&nbsp;├── config.yaml           # Unified configuration file
+&nbsp;&nbsp;├── data/
+&nbsp;&nbsp;│&nbsp;&nbsp;├── cgm_data.csv      # CGM time series input
+&nbsp;&nbsp;│&nbsp;&nbsp;└── user_info.txt     # User description text
+&nbsp;&nbsp;├── reference.json        # Reference literature for recommendation module
+&nbsp;&nbsp;├── best_model.pth        # Trained model weights (auto-generated)
+&nbsp;&nbsp;└── outputs/              # Prediction & recommendation results (auto-generated)
