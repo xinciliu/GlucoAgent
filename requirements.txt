@@ -1,23 +1,15 @@
-# Core Deep Learning Framework
 torch>=2.0.0
 torchvision>=0.15.0
 
-# Data Processing
 pandas>=1.5.0
 numpy>=1.23.0
 
-# Machine Learning & Utilities
 scikit-learn>=1.1.0
 
-# NLP & Text Embedding
 transformers>=4.28.0
 
-# Configuration
 pyyaml>=6.0
-
-# LLM API & HTTP Requests
+argparse>=1.4.0
 requests>=2.31.0
-openai>=1.0.0
 
-# (Optional) Visualization
 matplotlib>=3.5.0
