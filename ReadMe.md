@@ -39,18 +39,8 @@ All dependencies are listed in `requirements.txt`, including:
 Only one raw numerical CSV file is required: `cgm_ts.csv`
 
 ### File Format Requirements
-- The CSV file contains multiple feature columns for CGM monitoring (glucose value, carbohydrate intake, insulin dosage and other time-series indicators).
+- The CSV file contains multiple feature columns for CGM monitoring (glucose value, carbohydrate intake, insulin dosage).
 
-### Project Structure
-GlucoAgent/
-├── cgm_agent_ohio_t1dm_all_iter.py   # Main model & program code
-├── requirements.txt                  # Environment dependency list
-├── README.md                         # Project documentation
-├── cgm_ts.csv                        # Main raw numerical dataset
-├── test1_ts.csv / test2_ts.csv / test3_ts.csv  # Optional test datasets
-├── training_ohio_t1dm.json           # Optional task configuration file
-├── OhioT1DM_Result_nohyper/          # Auto-generated folder for prediction outputs
-└── *.pth                             # Auto-generated model weight files
 - A fixed target column named **OT** must be included, which represents the ground-truth blood glucose value for model prediction.
 
 ## Project Structure
