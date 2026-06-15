@@ -26,6 +26,7 @@ All dependencies are listed in `requirements.txt`, including:
 ## Data Specification
 ### Data File
 `./data/cgm_ts.csv`, which contains CGM time-series features and a mandatory column named **OT** (ground truth glucose value), as well as carbohydrate intake and insulin dosage.
+
 `./data/user_info.txt`, Plain text for user information, including age, gender, diabetes type, medical history and living habits.
 
 
