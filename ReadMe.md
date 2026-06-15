@@ -2,21 +2,10 @@
 ## Project Overview
 This repository implements the core model of **GlucoAgent**, a multimodal artificial intelligence framework proposed in the paper *GlucoAgent: A Multimodal AI Framework for Long-Term Glucose Prediction and Personalized Diabetes Management*.
 
-The framework is designed for long-term continuous glucose monitoring (CGM) prediction, targeted at diabetes management scenarios. It combines time-series numerical features and automatically generated text embeddings to achieve accurate glucose forecasting, early detection of hyperglycemia and hypoglycemia, and supports personalized model adaptation with limited patient data.
+GlucoAgent integrates system with two core functions:
+1. **Long-term CGM Prediction**: Forecast future blood glucose based on CGM time series data.
+2. **Personalized Recommendation**: Generate diabetes lifestyle guidance using predicted results and user profile.
 
-## Key Features
-1. **Dual-Branch Multimodal Architecture**
-   Build separate encoding branches for numerical CGM time-series and text semantics, fully mining multi-dimensional information from raw monitoring data.
-2. **Automatic Text Embedding Generation**
-   Integrated DistilBERT to convert numerical time-series data into natural language descriptions and generate text embeddings automatically. **No manual production of text CSV files is required**, only raw numerical data is needed.
-3. **Enhanced Physiological Perception Module**
-   Equipped with glycemia refinement components and threshold-aware loss functions to strengthen the model’s sensitivity to clinically critical hyperglycemia and hypoglycemia events.
-4. **Gated Fusion & Knowledge Distillation**
-   Adopt adaptive gated fusion to balance contributions from numerical and text branches. Combined with knowledge distillation to improve model generalization and prediction stability.
-5. **Data-Efficient Fine-Tuning**
-   Support uniform tuning strategy, which enables rapid model personalization for new users or scenarios with limited historical CGM data.
-6. **Multi-Step Long-Term Prediction**
-   Support multi-task long-term glucose prediction with different prediction horizons, covering 15h, 18h and 24h forecasting requirements in practical diabetes management.
 
 ## Environment & Dependencies
 ### Supported Python Version
@@ -36,23 +25,32 @@ All dependencies are listed in `requirements.txt`, including:
 
 ## Data Specification
 ### Data File
-CGM raw numerical CSV file is required: `cgm_ts.csv`
+`./data/cgm_ts.csv`, which contains CGM time-series features and a mandatory column named **OT** (ground truth glucose value), as well as carbohydrate intake and insulin dosage.
+`./data/user_info.txt`, Plain text for user information, including age, gender, diabetes type, medical history and living habits.
 
-### File Format Requirements
-- The CSV file contains multiple feature columns for CGM monitoring (glucose value, carbohydrate intake, insulin dosage).
-- A fixed target column named **OT** must be included, which represents the ground-truth blood glucose value for model prediction.
 
 ## Project Structure
 GlucoAgent/
+
 ├── main.py               # 唯一入口：训练/预测/推荐 全流程主代码
+
 ├── requirements.txt      # 依赖清单
+
 ├── README.md             # 项目说明（英文）
+
 ├── config.yaml           # 统一配置文件（模型/数据/LLM 所有参数）
+
 ├── data/                 # 输入数据文件夹
+
 │   ├── cgm_data.csv      # CGM 时序输入（必填）
+
 │   └── user_info.txt     # 用户描述文本（必填）
+
 ├── reference.json        # 推荐模块：糖尿病参考文献库
+
 ├── best_model.pth        # 自动生成：训练好的模型权重
+
 └── outputs/              # 自动生成：预测结果 + 推荐文本
+
 
 ## Project Structure
