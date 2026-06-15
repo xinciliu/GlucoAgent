@@ -30,14 +30,14 @@ All dependencies are listed in `requirements.txt`, including:
 
 
 ## Project Structure
-GlucoAgent/
-&nbsp;&nbsp;├── main.py               # Main program (train / predict / generate recommendation)
-&nbsp;&nbsp;├── requirements.txt      # Python dependencies
-&nbsp;&nbsp;├── README.md             # Project documentation
-&nbsp;&nbsp;├── config.yaml           # Unified configuration file
-&nbsp;&nbsp;├── data/
-&nbsp;&nbsp;│&nbsp;&nbsp;├── cgm_data.csv      # CGM time series input
-&nbsp;&nbsp;│&nbsp;&nbsp;└── user_info.txt     # User description text
-&nbsp;&nbsp;├── reference.json        # Reference literature for recommendation module
-&nbsp;&nbsp;├── best_model.pth        # Trained model weights (auto-generated)
-&nbsp;&nbsp;└── outputs/              # Prediction & recommendation results (auto-generated)
+## Project Structure
+- `main.py`: Main program (train / predict / generate recommendation)
+- `requirements.txt`: Python dependencies
+- `README.md`: Project documentation
+- `config.yaml`: Unified configuration file
+- `data/`
+  - `cgm_data.csv`: CGM time series input
+  - `user_info.txt`: User description text
+- `reference.json`: Reference literature for recommendation module
+- `best_model.pth`: Trained model weights (auto-generated)
+- `outputs/`: Prediction & recommendation results (auto-generated)
