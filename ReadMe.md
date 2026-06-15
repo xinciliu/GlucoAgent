@@ -28,6 +28,7 @@ All dependencies are listed in `requirements.txt`, including:
 `./data/cgm_ts.csv`, which contains CGM time-series features and a mandatory column named **OT** (ground truth glucose value), as well as carbohydrate intake and insulin dosage.
 
 `./data/user_info.txt`, Plain text for user information, including age, gender, diabetes type, medical history and living habits.
+
 `./data/reference_paper.json`, reference paper that is extracted from database that are closely related to this patient.
 
 ## Project Structure
@@ -39,6 +40,7 @@ All dependencies are listed in `requirements.txt`, including:
 - `data/`
   - `cgm_data.csv`: CGM time series input
   - `user_info.txt`: User description text
+  - `reference_paper.json`: reference paper related to this patient
 - `model/`
   - `cgm_forecasting.py`: CGM time series forecasting
   - `recommendation_generation.py`: Recommendation Generation
