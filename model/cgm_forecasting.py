@@ -478,6 +478,8 @@ def predict_24h(model_path, csv_path, patient_txt_path):
 
 # Load raw data and extract the last complete input sequence
     df = pd.read_csv(csv_path)
+    if "Date" in df.columns:
+        df = df.drop(columns=["Date"])
     feats_raw = df.drop("OT", axis=1).values
     label_raw = df["OT"].values
     last_seq = feats_raw[-SEQ_LEN:]
