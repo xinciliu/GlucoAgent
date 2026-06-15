@@ -40,7 +40,19 @@ CGM raw numerical CSV file is required: `cgm_ts.csv`
 
 ### File Format Requirements
 - The CSV file contains multiple feature columns for CGM monitoring (glucose value, carbohydrate intake, insulin dosage).
-
 - A fixed target column named **OT** must be included, which represents the ground-truth blood glucose value for model prediction.
+
+### Project Structure
+GlucoAgent/
+├── main.py               # 唯一入口：训练/预测/推荐 全流程主代码
+├── requirements.txt      # 依赖清单
+├── README.md             # 项目说明（英文）
+├── config.yaml           # 统一配置文件（模型/数据/LLM 所有参数）
+├── data/                 # 输入数据文件夹
+│   ├── cgm_data.csv      # CGM 时序输入（必填）
+│   └── user_info.txt     # 用户描述文本（必填）
+├── reference.json        # 推荐模块：糖尿病参考文献库
+├── best_model.pth        # 自动生成：训练好的模型权重
+└── outputs/              # 自动生成：预测结果 + 推荐文本
 
 ## Project Structure
