@@ -44,6 +44,5 @@ All dependencies are listed in `requirements.txt`, including:
 - `model/`
   - `cgm_forecasting.py`: CGM time series forecasting
   - `recommendation_generation.py`: Recommendation Generation
-- `reference.json`: Reference literature for recommendation module
 - `best_model.pth`: Trained model weights (auto-generated)
 - `outputs/`: Prediction & recommendation results (auto-generated)
