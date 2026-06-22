@@ -73,11 +73,11 @@ def load_patient_glucose(input_csv_path: str, output_csv_path: str):
     """
     df_input = pd.read_csv(input_csv_path)
     if "Date" in df_input.columns:
-        df_input = df.drop(columns=["Date"])
+        df_input = df_input.drop(columns=["Date"])
     history_glucose = df_input["OT"].tail(96).tolist()
 
     df_output = pd.read_csv(output_csv_path)
-    pred_glucose = df_output["Predicted_24h_Glucose"].tolist()
+    pred_glucose = df_output["Predicted_Glucose"].tolist()
     return history_glucose, pred_glucose
 
 def load_txt_file(file_path: str) -> str:
