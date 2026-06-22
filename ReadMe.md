@@ -64,17 +64,15 @@ Output:
   - Model checkpoint: best_model.pth (project root directory)
   - Predicted glucose file: outputs/prediction_result.csv
 
-### Step 2:
+### Step 2:Generate Personalized Diabetes Lifestyle Recommendations
 Step 1 must finish successfully first, otherwise the predicted glucose file will be missing and trigger loading error.
 Required arguments:
-
---hist_cgm: Raw original CGM time series CSV path
---pred_cgm: Predicted glucose CSV generated in Step1
---user_info: Patient personal information text file
---reference: Diabetes research reference JSON file
+  - --hist_cgm: Raw original CGM time series CSV path
+  - --pred_cgm: Predicted glucose CSV generated in Step1
+  - --user_info: Patient personal information text file
+  - --reference: Diabetes research reference JSON file
 
 Command:
-
   python ./model/recommendation_generation.py \
   --hist_cgm ./data/cgm_data.csv \
   --pred_cgm ./outputs/prediction_result.csv \
