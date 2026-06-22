@@ -36,7 +36,6 @@ All dependencies are listed in `requirements.txt`, including:
 - `main.py`: Main program (train / predict / generate recommendation)
 - `requirements.txt`: Python dependencies
 - `README.md`: Project documentation
-- `config.yaml`: Unified configuration file
 - `data/`
   - `cgm_data.csv`: CGM time series input
   - `user_info.txt`: User description text
@@ -46,3 +45,43 @@ All dependencies are listed in `requirements.txt`, including:
   - `recommendation_generation.py`: Recommendation Generation
 - `best_model.pth`: Trained model weights (auto-generated)
 - `outputs/`: Prediction & recommendation results (auto-generated)
+
+## Usage Pipeline
+
+The full execution workflow contains two sequential steps:
+- Run time-series forecasting script to generate predicted glucose CSV in outputs/ folder
+- Run LLM recommendation script using predicted glucose file, patient profile and reference papers to generate personalized advice JSON in outputs/
+
+### Step 1: Train Model & Generate Glucose Prediction Results
+Required arguments:
+--csv: original CGM data, including OT( which means CGM value), dietary_transfer, insulin_transfer
+--txt: a paragraph that represent the basic information of patient.
+
+Command:
+python ./model/cgm_forecasting.py --csv ./data/cgm_data.csv --txt ./data/user_info.txt
+Output:
+Model checkpoint: best_model.pth (project root directory)
+Predicted glucose file: outputs/prediction_result.csv
+
+### Step 2:
+Step 1 must finish successfully first, otherwise the predicted glucose file will be missing and trigger loading error.
+Required arguments:
+--hist_cgm: Raw original CGM time series CSV path
+--pred_cgm: Predicted glucose CSV generated in Step1
+--user_info: Patient personal information text file
+--reference: Diabetes research reference JSON file
+
+Command:
+python ./model/recommendation_generation.py \
+--hist_cgm ./data/cgm_data.csv \
+--pred_cgm ./outputs/prediction_result.csv \
+--user_info ./data/user_info.txt \
+--reference ./data/reference_paper.json
+
+Output:
+LLM structured JSON recommendations printed in terminal
+Result file: outputs/recommendation_result.json
+
+
+
+
