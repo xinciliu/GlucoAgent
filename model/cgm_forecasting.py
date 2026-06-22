@@ -130,11 +130,10 @@ class TextBranch(nn.Module):
         out = out.view(-1, PRED_LEN, 1)
         return out
 
-# ===================== 4.【重磅优化】自适应门控融合（解决原融合层太简单、无法学习权重问题） =====================
+# ===================== 4.【重磅优化】自适应门控融合 =====================
 class FusionGate(nn.Module):
     def __init__(self, dropout=0.2):
         super().__init__()
-        # 全局上下文 + 逐时间步双门控，更强拟合能力
         self.context_gate = nn.Sequential(
             nn.Linear(2, 32),
             nn.ReLU(),
@@ -149,7 +148,7 @@ class FusionGate(nn.Module):
         fuse_pred = gate_w * num_pred + (1 - gate_w) * text_pred
         return self.dropout(fuse_pred)
 
-# ===================== 5. 数据集模块（无改动，已彻底修复numpy stack报错） =====================
+# ===================== 5. 数据集模块 =====================
 class CGMDataset(Dataset):
     def __init__(self, feat_tensor_list, target_tensor_list, hist_len_list, pred_len_list):
         self.feat_list = feat_tensor_list
@@ -225,15 +224,13 @@ def load_cgm_data(csv_path, hist_len, pred_len):
 
     return feat_list, target_list, hist_list, pred_list, feat_mean_save, feat_std_save, scaler_y
 
-# ===================== 6.【损失函数优化】提升主损失权重、降低分支辅助损失，加速收敛 =====================
+# ===================== 6. 损失函数 =====================
 def stable_loss(fuse_pred, num_pred, text_pred, target, mask):
     mae = nn.L1Loss(reduction="none")
     mse = nn.MSELoss(reduction="none")
     valid_mask = mask[:, :PRED_LEN, :]
 
-    # 主融合损失权重拉高，优先优化最终输出
     loss_fuse = (0.5 * mae(fuse_pred, target[:, :PRED_LEN, :]) + 0.5 * mse(fuse_pred, target[:, :PRED_LEN, :])) * valid_mask
-    # 大幅降低分支辅助损失，避免分支梯度干扰主网络收敛
     loss_num = 0.1 * mae(num_pred, target[:, :PRED_LEN, :]) * valid_mask
     loss_text = 0.1 * mae(text_pred, target[:, :PRED_LEN, :]) * valid_mask
 
@@ -241,9 +238,11 @@ def stable_loss(fuse_pred, num_pred, text_pred, target, mask):
     total_loss = torch.clamp(total_loss, min=LOSS_FLOOR)
     return total_loss
 
-# ===================== 7.【训练流程大优化】解决dummy向量无梯度、学习率过低、无warmup问题 =====================
+# ===================== 7. 训练主流程（新增验证集真值/预测值保存+指标计算） =====================
 def train(csv_path):
     feat_list, target_list, hist_list, pred_list, feat_mean, feat_std, scaler_y = load_cgm_data(csv_path, SEQ_LEN, PRED_LEN)
+    y_mean = scaler_y["mean"]
+    y_std = scaler_y["std"]
 
     train_idx, val_idx = train_test_split(list(range(len(feat_list))), test_size=0.2, random_state=42)
     train_dataset = CGMDataset(
@@ -267,13 +266,11 @@ def train(csv_path):
     text_model = TextBranch().to(device)
     fuse_model = FusionGate().to(device)
 
-    # 关键优化1：提升初始学习率 + 权重衰减下调
     optimizer = torch.optim.AdamW(
         list(num_model.parameters()) + list(text_model.parameters()) + list(fuse_model.parameters()),
         lr=5e-4, weight_decay=5e-5
     )
 
-    # 关键优化2：warmup预热学习率，前期缓慢升温，后期余弦退火，彻底解决不收敛
     warmup_scheduler = LinearLR(optimizer, start_factor=0.2, end_factor=1.0, total_iters=WARMUP_EPOCH)
     cos_scheduler = CosineAnnealingLR(optimizer, T_max=17, eta_min=1e-5)
     scheduler = SequentialLR(optimizer, schedulers=[warmup_scheduler, cos_scheduler], milestones=[WARMUP_EPOCH])
@@ -282,10 +279,8 @@ def train(csv_path):
 
     best_val_loss = float("inf")
     save_path = "best_cgm_model.pth"
-    epoch_num = 20
+    epoch_num = 100
 
-    # 关键优化3：**可学习文本嵌入，替换随机固定dummy向量**
-    # 原来随机randn全程不变，文本分支永远学不到东西，现在用可训练参数，参与梯度更新
     learnable_text_emb = nn.Parameter(torch.randn(1, SEQ_LEN, 64, device=device), requires_grad=True)
 
     for epoch in range(epoch_num):
@@ -302,7 +297,6 @@ def train(csv_path):
 
             out_num = num_model(feat_seq)
             bsz = feat_seq.shape[0]
-            # 复制可学习文本嵌入，参与梯度反向传播，文本分支终于可以更新参数
             batch_text_emb = learnable_text_emb.repeat(bsz, 1, 1)
             out_text = text_model(batch_text_emb, seq_len_batch)
             out_fuse = fuse_model(out_num, out_text)
@@ -320,11 +314,13 @@ def train(csv_path):
             train_loss += loss.item()
         train_loss /= len(train_loader)
 
-        # 验证
+        # -------------------------- 验证阶段：收集真值、预测值 --------------------------
         num_model.eval()
         text_model.eval()
         fuse_model.eval()
         val_loss = 0.0
+        all_true = []
+        all_pred = []
         with torch.no_grad():
             for batch in val_loader:
                 feat_seq, target, mask, seq_len_batch, pred_len_batch = batch
@@ -337,13 +333,27 @@ def train(csv_path):
                 batch_text_emb = learnable_text_emb.repeat(bsz, 1, 1)
                 out_text = text_model(batch_text_emb, seq_len_batch)
                 out_fuse = fuse_model(out_num, out_text)
+
                 loss = stable_loss(out_fuse, out_num, out_text, target, mask)
                 val_loss += loss.item()
+
+                # 只取前PRED_LEN步，逆标准化还原原始血糖尺度
+                target_cut = target[:, :PRED_LEN, 0]  # [B, pred_len]
+                pred_cut = out_fuse[:, :PRED_LEN, 0]  # [B, pred_len]
+
+                # 逆标准化，和预测输出csv同一尺度
+                target_ori = target_cut * y_std + y_mean
+                pred_ori = pred_cut * y_std + y_mean
+
+                all_true.append(target_ori.cpu())
+                all_pred.append(pred_ori.cpu())
+
         val_loss /= len(val_loader)
         scheduler.step()
 
         print(f"Epoch {epoch+1:2d} | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f} | LR: {optimizer.param_groups[0]['lr']:.6f}")
 
+        # 保存最优模型 + 导出评估真值/预测并计算指标
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save({
@@ -355,11 +365,37 @@ def train(csv_path):
                 "feat_std": feat_std,
                 "scaler_y": scaler_y
             }, save_path)
+            print(f"New best model saved at epoch {epoch+1}")
+
+            # 拼接全部验证集真实值、预测值
+            y_true_all = torch.cat(all_true, dim=0).numpy()  # [N, pred_len]
+            y_pred_all = torch.cat(all_pred, dim=0).numpy()  # [N, pred_len]
+
+            # 展平计算全局MAE、RMSE
+            y_true_flat = y_true_all.reshape(-1)
+            y_pred_flat = y_pred_all.reshape(-1)
+
+            mae_val = np.mean(np.abs(y_true_flat - y_pred_flat))
+            rmse_val = np.sqrt(np.mean((y_true_flat - y_pred_flat) ** 2))
+
+            print("="*50)
+            print(f"BEST MODEL VALIDATION METRICS (original glucose scale):")
+            print(f"MAE  = {mae_val:.4f}")
+            print(f"RMSE = {rmse_val:.4f}")
+            print("="*50)
+
+            # 保存评估结果到csv
+            eval_df = pd.DataFrame({
+                "True_Glucose": y_true_flat,
+                "Predicted_Glucose": y_pred_flat
+            })
+            eval_df.to_csv("outputs/eval_result.csv", index=False)
+            print(f"Evaluation true/pred saved to outputs/eval_result.csv")
 
     print(f"训练完成，最优模型已保存至 {save_path}")
     return save_path
 
-# ===================== 8. 推理预测（同步加载可学习文本嵌入，无改动） =====================
+# ===================== 8. 推理预测 =====================
 def predict(checkpoint_path, csv_path, txt_path):
     with open(txt_path, "r", encoding="utf-8") as f:
         patient_info = f.read().strip()
@@ -375,6 +411,8 @@ def predict(checkpoint_path, csv_path, txt_path):
     feat_std = torch.tensor(ckpt["feat_std"], dtype=torch.float32).to(device)
     scaler_y = ckpt["scaler_y"]
     learnable_text_emb = ckpt["learn_text_emb"]
+    y_mean = scaler_y["mean"]
+    y_std = scaler_y["std"]
 
     feat_dim = feat_np.shape[-1]
     num_model = NumericalBranch(feat_dim).to(device)
@@ -401,15 +439,15 @@ def predict(checkpoint_path, csv_path, txt_path):
         pred_text = text_model(real_text_emb, seq_len_tensor)
         pred_fuse = fuse_model(pred_num, pred_text)
 
-    pred_res = pred_fuse.squeeze(-1)[0].cpu().numpy() * scaler_y["std"] + scaler_y["mean"]
+    pred_res = pred_fuse.squeeze(-1)[0].cpu().numpy() * y_std + y_mean
     pd.DataFrame({"Predicted_Glucose": pred_res}).to_csv("outputs/prediction_result.csv", index=False)
     print("预测完成，结果保存至 outputs/prediction_result.csv")
 
 # ===================== 程序入口 =====================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", type=str, required=True)
-    parser.add_argument("--txt", type=str, required=True)
+    parser.add_argument("--csv", type=str, required=True, help="Raw CGM csv path with OT column")
+    parser.add_argument("--txt", type=str, required=True, help="Patient info text file path")
     args = parser.parse_args()
     best_ckpt = train(args.csv)
     predict(best_ckpt, args.csv, args.txt)
