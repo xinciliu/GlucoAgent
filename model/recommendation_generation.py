@@ -2,6 +2,8 @@ import sys
 import requests
 import json
 import pandas as pd
+import argparse
+import os
 
 # Fixed API Configuration
 API_URL = "https://api.chatanywhere.tech/v1/chat/completions"
@@ -9,6 +11,10 @@ API_KEY = "sk-6k6d7PIe27uMdZpbKVGWKJBFtRU1jPrBhAhOtWT51TmRlepn"
 MODEL_NAME = "gpt-4o"
 MAX_TOKENS = 2000
 TEMPERATURE = 0.7
+
+# 确保输出目录存在
+os.makedirs("outputs", exist_ok=True)
+SAVE_REC_PATH = "outputs/recommendation_result.json"
 
 def run_gpt_api(prompt: str) -> str | None:
     """
@@ -160,25 +166,32 @@ def generate_recommendation(input_csv, output_csv, patient_txt, ref_json):
 
 if __name__ == "__main__":
     """
-    Command line usage:
-    python generate_llm.py input.csv output.csv patient_info.txt reference.json
-    Arg1: input_csv -> raw CGM time series csv (contains OT, auto drop Date)
-    Arg2: output_csv -> model predicted 24h glucose csv
-    Arg3: patient_info.txt -> patient personal description text file
-    Arg4: reference.json -> diabetes reference literature json
+    Command line usage unified with cgm forecasting script:
+    python generate_llm.py --hist_cgm input.csv --pred_cgm outputs/prediction_result.csv --user_info patient_info.txt --reference reference.json
+    --hist_cgm    raw CGM time series csv with OT column
+    --pred_cgm    model predicted glucose csv file
+    --user_info   patient personal info text file
+    --reference   reference literature json file
     """
-    if len(sys.argv) != 5:
-        print("Usage: python generate_llm.py [input.csv] [output.csv] [patient_info.txt] [reference.json]")
-        sys.exit(1)
-
-    # Receive parameters via sys.argv
-    arg_input = sys.argv[1]
-    arg_output = sys.argv[2]
-    arg_patient_txt = sys.argv[3]
-    arg_ref_json = sys.argv[4]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hist_cgm", type=str, required=True, help="Original CGM csv with OT column")
+    parser.add_argument("--pred_cgm", type=str, required=True, help="Predicted glucose csv output from forecasting model")
+    parser.add_argument("--user_info", type=str, required=True, help="Patient info text file path")
+    parser.add_argument("--reference", type=str, required=True, help="Reference paper json file path")
+    args = parser.parse_args()
 
     # Run recommendation generation
-    final_rec = generate_recommendation(arg_input, arg_output, arg_patient_txt, arg_ref_json)
+    final_rec = generate_recommendation(
+        input_csv=args.hist_cgm,
+        output_csv=args.pred_cgm,
+        patient_txt=args.user_info,
+        ref_json=args.reference
+    )
 
     # Print final json result
     print(json.dumps(final_rec, indent=2, ensure_ascii=False))
+
+    # 新增：保存结果到 outputs 文件夹
+    with open(SAVE_REC_PATH, "w", encoding="utf-8") as f:
+        json.dump(final_rec, f, indent=2, ensure_ascii=False)
+    print(f"\nRecommendations saved to {SAVE_REC_PATH}")
