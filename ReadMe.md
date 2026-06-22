@@ -47,7 +47,6 @@ All dependencies are listed in `requirements.txt`, including:
 - `outputs/`: Prediction & recommendation results (auto-generated)
 
 ## Usage Pipeline
-
 The full execution workflow contains two sequential steps:
  - Run time-series forecasting script to generate predicted glucose CSV in outputs/ folder
  - Run LLM recommendation script using predicted glucose file, patient profile and reference papers to generate personalized advice JSON in outputs/
@@ -76,15 +75,15 @@ Required arguments:
 
 Command:
 
-python ./model/recommendation_generation.py \
---hist_cgm ./data/cgm_data.csv \
---pred_cgm ./outputs/prediction_result.csv \
---user_info ./data/user_info.txt \
---reference ./data/reference_paper.json
+  python ./model/recommendation_generation.py \
+  --hist_cgm ./data/cgm_data.csv \
+  --pred_cgm ./outputs/prediction_result.csv \
+  --user_info ./data/user_info.txt \
+  --reference ./data/reference_paper.json
 
 Output:
-LLM structured JSON recommendations printed in terminal
-Result file: outputs/recommendation_result.json
+  - LLM structured JSON recommendations printed in terminal
+  - Result file: outputs/recommendation_result.json
 
 
 
