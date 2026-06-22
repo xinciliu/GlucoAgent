@@ -48,9 +48,9 @@ All dependencies are listed in `requirements.txt`, including:
 
 ## Usage Pipeline
 
-The full execution workflow contains two sequential steps:
-- Run time-series forecasting script to generate predicted glucose CSV in outputs/ folder
-- Run LLM recommendation script using predicted glucose file, patient profile and reference papers to generate personalized advice JSON in outputs/
+- The full execution workflow contains two sequential steps:
+  - Run time-series forecasting script to generate predicted glucose CSV in outputs/ folder
+  - Run LLM recommendation script using predicted glucose file, patient profile and reference papers to generate personalized advice JSON in outputs/
 
 ### Step 1: Train Model & Generate Glucose Prediction Results
 - Required arguments:
