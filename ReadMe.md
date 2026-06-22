@@ -53,17 +53,17 @@ The full execution workflow contains two sequential steps:
 - Run LLM recommendation script using predicted glucose file, patient profile and reference papers to generate personalized advice JSON in outputs/
 
 ### Step 1: Train Model & Generate Glucose Prediction Results
-Required arguments:
---csv: original CGM data, including OT( which means CGM value), dietary_transfer, insulin_transfer
---txt: a paragraph that represent the basic information of patient.
+- Required arguments:
+- --csv: original CGM data, including OT( which means CGM value), dietary_transfer, insulin_transfer
+- --txt: a paragraph that represent the basic information of patient.
 
 Command:
 
-python ./model/cgm_forecasting.py --csv ./data/cgm_data.csv --txt ./data/user_info.txt
+- python ./model/cgm_forecasting.py --csv ./data/cgm_data.csv --txt ./data/user_info.txt
 
-Output:
-Model checkpoint: best_model.pth (project root directory)
-Predicted glucose file: outputs/prediction_result.csv
+- Output:
+  - Model checkpoint: best_model.pth (project root directory)
+  - Predicted glucose file: outputs/prediction_result.csv
 
 ### Step 2:
 Step 1 must finish successfully first, otherwise the predicted glucose file will be missing and trigger loading error.
