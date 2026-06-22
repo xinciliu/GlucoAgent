@@ -74,7 +74,7 @@ Required arguments:
 
 Command:
 
-  python ./model/recommendation_generation.py \
+  - python ./model/recommendation_generation.py \
   --hist_cgm ./data/cgm_data.csv \
   --pred_cgm ./outputs/prediction_result.csv \
   --user_info ./data/user_info.txt \
