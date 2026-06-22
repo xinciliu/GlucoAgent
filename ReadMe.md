@@ -63,6 +63,11 @@ Output:
   - Model checkpoint: best_model.pth (project root directory)
   - Predicted glucose file: outputs/prediction_result.csv
 
+Training Log Details：
+  - During training, after each epoch the training & validation loss will be printed.
+  - When a new best model (minimum validation loss) is captured, the script automatically calculate and print global validation MAE and RMSE to console.
+
+
 ### Step 2:Generate Personalized Diabetes Lifestyle Recommendations
 Step 1 must finish successfully first, otherwise the predicted glucose file will be missing and trigger loading error.
 Required arguments:
