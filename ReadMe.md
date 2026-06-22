@@ -63,7 +63,7 @@ Output:
   - Model checkpoint: best_model.pth (project root directory)
   - Predicted glucose file: outputs/prediction_result.csv
 
-Training Log Details：
+Training Log Details (Evaluation Logs)：
   - During training, after each epoch the training & validation loss will be printed.
   - When a new best model (minimum validation loss) is captured, the script automatically calculate and print global validation MAE and RMSE to console.
 
