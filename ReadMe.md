@@ -32,7 +32,6 @@ All dependencies are listed in `requirements.txt`, including:
 `./data/reference_paper.json`, reference paper that is extracted from database that are closely related to this patient.
 
 ## Project Structure
-## Project Structure
 - `main.py`: Main program (train / predict / generate recommendation)
 - `requirements.txt`: Python dependencies
 - `README.md`: Project documentation
