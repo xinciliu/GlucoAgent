@@ -73,6 +73,7 @@ Required arguments:
   - --reference: Diabetes research reference JSON file
 
 Command:
+
   python ./model/recommendation_generation.py \
   --hist_cgm ./data/cgm_data.csv \
   --pred_cgm ./outputs/prediction_result.csv \
